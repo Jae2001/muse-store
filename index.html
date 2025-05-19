@@ -7,38 +7,43 @@
   <body>
     <h1>Hello, this is Muse!</h1>
     <p>Your site is now live 🎉</p>
+
+    <!-- 🔧 加这个区块：产品列表会插入到这里 -->
+    <div id="product-list"></div>
+
     <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
-    authDomain: "muse-store-01.firebaseapp.com",
-    projectId: "muse-store-01",
-    storageBucket: "muse-store-01.firebasestorage.app",
-    messagingSenderId: "590294528151",
-    appId: "1:590294528151:web:b7a16dfb58a64d641579d2"
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
+        authDomain: "muse-store-01.firebaseapp.com",
+        projectId: "muse-store-01",
+        storageBucket: "muse-store-01.firebasestorage.app",
+        messagingSenderId: "590294528151",
+        appId: "1:590294528151:web:b7a16dfb58a64d641579d2"
+      };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
-  // 测试读取 Firestore 商品集合
-  async function loadProducts() {
-    const querySnapshot = await getDocs(collection(db, "products"));
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      console.log(`${doc.id} =>`, data);
-      document.body.innerHTML += `<p>🛍️ ${data.name} - RM${data.price}</p>`;
-    });
-  }
-document.getElementById("product-list").innerHTML += `
-  <div>
-    <img src="${data.imageUrl}" alt="${data.name}" width="150" />
-    <p>🛍️ ${data.name} - RM${data.price}</p>
-  </div>
-`;
-  loadProducts();
-</script>
+      async function loadProducts() {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const productList = document.getElementById("product-list");
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log(`${doc.id} =>`, data);
+          productList.innerHTML += `
+            <div>
+              <img src="${data.imageUrl}" alt="${data.name}" width="150" />
+              <p>🛍️ ${data.name} - RM${data.price}</p>
+            </div>
+          `;
+        });
+      }
+
+      loadProducts();
+    </script>
   </body>
 </html>
