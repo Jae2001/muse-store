@@ -32,7 +32,12 @@
       document.body.innerHTML += `<p>🛍️ ${data.name} - RM${data.price}</p>`;
     });
   }
-
+document.getElementById("product-list").innerHTML += `
+  <div>
+    <img src="${data.imageUrl}" alt="${data.name}" width="150" />
+    <p>🛍️ ${data.name} - RM${data.price}</p>
+  </div>
+`;
   loadProducts();
 </script>
   </body>
