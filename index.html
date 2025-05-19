@@ -3,26 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <title>Welcome to Muse Store</title>
-    <style>
-      .product {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 10px;
-        display: inline-block;
-        text-align: center;
-        width: 180px;
-      }
-      button {
-        padding: 5px 10px;
-        margin-top: 10px;
-      }
-    </style>
   </head>
   <body>
     <h1>Hello, this is Muse!</h1>
     <p>Your site is now live 🎉</p>
-
-    <h2>🛍️ 商品列表</h2>
     <div id="product-list"></div>
 
     <script type="module">
@@ -41,33 +25,29 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
+      // 加载商品
       async function loadProducts() {
         const querySnapshot = await getDocs(collection(db, "products"));
-        const productList = document.getElementById("product-list");
-
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const productHTML = `
-            <div class="product">
+          console.log(`${doc.id} =>`, data);
+
+          document.getElementById("product-list").innerHTML += `
+            <div style="border:1px solid #ccc; padding:10px; margin:10px;">
               <img src="${data.imageUrl}" alt="${data.name}" width="150" />
-              <p><strong>${data.name}</strong></p>
-              <p>RM${data.price}</p>
-              <button onclick="addToCart('${doc.id}', '${data.name}', ${data.price})">加入购物车</button>
+              <p>🛍️ ${data.name} - RM${data.price}</p>
+              <button onclick="buyNow('${data.name}', ${data.price})">Add to Cart</button>
             </div>
           `;
-          productList.innerHTML += productHTML;
         });
       }
 
-      // 暂时用 localStorage 来储存购物车
-      window.addToCart = function (id, name, price) {
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.push({ id, name, price });
-        localStorage.setItem("cart", JSON.stringify(cart));
-        alert(`✅ ${name} 已加入购物车！`);
-      };
-
       loadProducts();
+
+      // 定义按钮功能
+      window.buyNow = function(name, price) {
+        alert(`🛒 已加入购物车：${name} - RM${price}`);
+      };
     </script>
   </body>
 </html>
