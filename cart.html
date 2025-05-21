@@ -9,20 +9,23 @@
     <div id="cart-list"></div>
     <h2 id="total-price"></h2>
     <a href="index.html">⬅️ 返回商店</a>
-<script>
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const cartDiv = document.getElementById("cart-list"); // ✅ 改成正确的 ID
-  let total = 0;
 
-  if (cart.length === 0) {
-    cartDiv.innerHTML = "<p>购物车为空</p>";
-  } else {
-    cart.forEach((item) => {
-      cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)}</p>`;
-      total += item.price;
-    });
-    cartDiv.innerHTML += `<p><strong>总金额：RM${total.toFixed(2)}</strong></p>`;
-  }
-</script>
+    <script>
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartDiv = document.getElementById("cart-list");
+      const totalPriceEl = document.getElementById("total-price");
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartDiv.innerHTML = "<p>购物车为空</p>";
+        totalPriceEl.textContent = "";
+      } else {
+        cart.forEach((item) => {
+          cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)}</p>`;
+          total += item.price;
+        });
+        totalPriceEl.textContent = `总金额：RM${total.toFixed(2)}`;
+      }
+    </script>
   </body>
 </html>
