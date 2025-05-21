@@ -15,14 +15,18 @@
       const cartList = document.getElementById("cart-list");
       let total = 0;
 
-      cart.forEach((item, index) => {
-        total += item.price;
-        cartList.innerHTML += `
-          <div style="border-bottom:1px solid #ddd; margin:10px 0;">
-            ${item.name} - RM${item.price.toFixed(2)}
-          </div>
-        `;
-      });
+      if (cart.length === 0) {
+        cartList.innerHTML = "<p>购物车是空的。</p>";
+      } else {
+        cart.forEach((item, index) => {
+          total += item.price;
+          cartList.innerHTML += `
+            <div style="border-bottom:1px solid #ddd; margin:10px 0;">
+              ${item.name} - RM${item.price.toFixed(2)}
+            </div>
+          `;
+        });
+      }
 
       document.getElementById("total-price").textContent = `总金额：RM${total.toFixed(2)}`;
     </script>
