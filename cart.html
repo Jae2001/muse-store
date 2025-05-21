@@ -1,92 +1,84 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Shopping Cart</title>
-    <style>
-      button.delete-btn {
-        margin-left: 10px;
-        color: white;
-        background-color: #d9534f;
-        border: none;
-        padding: 2px 8px;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-      button.delete-btn:hover {
-        background-color: #c9302c;
-      }
-      #clear-cart {
-        margin-top: 15px;
-        padding: 6px 15px;
-        background-color: #5bc0de;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      #clear-cart:hover {
-        background-color: #31b0d5;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>🛒 您的购物车</h1>
-    <div id="cart-list"></div>
-    <h2 id="total-price"></h2>
-    <button id="clear-cart">🗑️ 清空购物车</button>
-    <br /><br />
-    <a href="index.html">⬅️ 返回商店</a>
+<head>
+  <meta charset="UTF-8" />
+  <title>购物车</title>
+  <style>
+    button {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛒 您的购物车</h1>
+  <div id="cart-list"></div>
+  <h2 id="total-price"></h2>
+  <button id="clear-cart">🗑️ 清空购物车</button>
+  <a href="index.html">⬅️ 返回商店</a>
 
-    <script>
-      const cartDiv = document.getElementById("cart-list");
-      const totalPrice = document.getElementById("total-price");
-      const clearBtn = document.getElementById("clear-cart");
+  <script>
+    // 读取本地购物车数据
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-      function renderCart() {
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cartDiv.innerHTML = "";
-        let total = 0;
-
-        if (cart.length === 0) {
-          cartDiv.innerHTML = "<p>购物车为空</p>";
-          totalPrice.textContent = "";
-          clearBtn.style.display = "none"; // 隐藏按钮
+    // 合并重复商品，统计数量
+    function mergeCart(cart) {
+      return cart.reduce((acc, item) => {
+        const found = acc.find(i => i.name === item.name);
+        if (found) {
+          found.quantity++;
         } else {
-          cart.forEach((item, index) => {
-            cartDiv.innerHTML += `
-              <p>
-                ${item.name} - RM${item.price.toFixed(2)}
-                <button class="delete-btn" data-index="${index}">删除</button>
-              </p>`;
-            total += item.price;
-          });
-          totalPrice.textContent = `总金额：RM${total.toFixed(2)}`;
-          clearBtn.style.display = "inline-block"; // 显示按钮
-
-          // 绑定删除按钮事件
-          document.querySelectorAll(".delete-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-              const idx = e.target.getAttribute("data-index");
-              removeItem(idx);
-            });
-          });
+          acc.push({...item, quantity: 1});
         }
+        return acc;
+      }, []);
+    }
+
+    // 更新购物车显示
+    function renderCart() {
+      const mergedCart = mergeCart(cart);
+      const cartDiv = document.getElementById("cart-list");
+      cartDiv.innerHTML = "";
+      let total = 0;
+
+      if (mergedCart.length === 0) {
+        cartDiv.innerHTML = "<p>购物车为空</p>";
+        document.getElementById("total-price").textContent = "";
+        return;
       }
 
-      function removeItem(index) {
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.splice(index, 1); // 删除指定项
+      mergedCart.forEach(item => {
+        cartDiv.innerHTML += `
+          <p>
+            ${item.name} - RM${item.price.toFixed(2)} x ${item.quantity}
+            <button onclick="removeOne('${item.name}')">删除一件</button>
+          </p>
+        `;
+        total += item.price * item.quantity;
+      });
+
+      document.getElementById("total-price").textContent = `总金额：RM${total.toFixed(2)}`;
+    }
+
+    // 删除某商品一件
+    window.removeOne = function(name) {
+      // 找到第一个匹配商品，删掉它
+      const index = cart.findIndex(item => item.name === name);
+      if (index !== -1) {
+        cart.splice(index, 1);
         localStorage.setItem("cart", JSON.stringify(cart));
         renderCart();
       }
+    };
 
-      clearBtn.addEventListener("click", () => {
-        localStorage.removeItem("cart");
-        renderCart();
-      });
-
+    // 清空购物车按钮
+    document.getElementById("clear-cart").onclick = function() {
+      cart = [];
+      localStorage.removeItem("cart");
       renderCart();
-    </script>
-  </body>
+    };
+
+    // 页面初始渲染
+    renderCart();
+  </script>
+</body>
 </html>
