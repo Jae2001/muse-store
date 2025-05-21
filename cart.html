@@ -3,6 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <title>Shopping Cart</title>
+    <style>
+      button.delete-btn {
+        margin-left: 10px;
+        color: white;
+        background-color: #d9534f;
+        border: none;
+        padding: 2px 8px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      button.delete-btn:hover {
+        background-color: #c9302c;
+      }
+      #clear-cart {
+        margin-top: 15px;
+        padding: 6px 15px;
+        background-color: #5bc0de;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #clear-cart:hover {
+        background-color: #31b0d5;
+      }
+    </style>
   </head>
   <body>
     <h1>🛒 您的购物车</h1>
@@ -27,13 +53,32 @@
           totalPrice.textContent = "";
           clearBtn.style.display = "none"; // 隐藏按钮
         } else {
-          cart.forEach((item) => {
-            cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)}</p>`;
+          cart.forEach((item, index) => {
+            cartDiv.innerHTML += `
+              <p>
+                ${item.name} - RM${item.price.toFixed(2)}
+                <button class="delete-btn" data-index="${index}">删除</button>
+              </p>`;
             total += item.price;
           });
           totalPrice.textContent = `总金额：RM${total.toFixed(2)}`;
           clearBtn.style.display = "inline-block"; // 显示按钮
+
+          // 绑定删除按钮事件
+          document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              const idx = e.target.getAttribute("data-index");
+              removeItem(idx);
+            });
+          });
         }
+      }
+
+      function removeItem(index) {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(index, 1); // 删除指定项
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
       }
 
       clearBtn.addEventListener("click", () => {
