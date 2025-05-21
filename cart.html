@@ -8,41 +8,40 @@
     <h1>🛒 您的购物车</h1>
     <div id="cart-list"></div>
     <h2 id="total-price"></h2>
+    <button id="clear-cart">🗑️ 清空购物车</button>
+    <br /><br />
     <a href="index.html">⬅️ 返回商店</a>
 
     <script>
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
       const cartDiv = document.getElementById("cart-list");
+      const totalPrice = document.getElementById("total-price");
+      const clearBtn = document.getElementById("clear-cart");
 
       function renderCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
         cartDiv.innerHTML = "";
         let total = 0;
 
         if (cart.length === 0) {
           cartDiv.innerHTML = "<p>购物车为空</p>";
-          document.getElementById("total-price").innerText = "";
+          totalPrice.textContent = "";
+          clearBtn.style.display = "none"; // 隐藏按钮
         } else {
-          cart.forEach((item, index) => {
-            cartDiv.innerHTML += `
-              <div style="margin-bottom: 10px;">
-                ${item.name} - RM${item.price.toFixed(2)}
-                <button onclick="removeItem(${index})">❌ 删除</button>
-              </div>
-            `;
+          cart.forEach((item) => {
+            cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)}</p>`;
             total += item.price;
           });
-
-          document.getElementById("total-price").innerText = `总金额：RM${total.toFixed(2)}`;
+          totalPrice.textContent = `总金额：RM${total.toFixed(2)}`;
+          clearBtn.style.display = "inline-block"; // 显示按钮
         }
       }
 
-      function removeItem(index) {
-        cart.splice(index, 1); // 删除该 index 的商品
-        localStorage.setItem("cart", JSON.stringify(cart));
+      clearBtn.addEventListener("click", () => {
+        localStorage.removeItem("cart");
         renderCart();
-      }
+      });
 
-      renderCart(); // 初次渲染
+      renderCart();
     </script>
   </body>
 </html>
