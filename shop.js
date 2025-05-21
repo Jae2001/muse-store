@@ -51,6 +51,13 @@ function removeFromCart(index) {
   cart.splice(index, 1);
   renderCart();
 }
+window.buyNow = function(name, price) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.push({ name, price });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert(`✅ ${name} 已加入购物车！`);
+};
+
 
 document.getElementById("checkout-button").addEventListener("click", () => {
   alert("这一步需要后端支持Stripe支付，等部署后我教你怎么设置！");
