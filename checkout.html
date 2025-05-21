@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Checkout</title>
+    <style>
+      img {
+        max-width: 200px;
+        display: block;
+        margin-bottom: 10px;
+      }
+      .method {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧾 结账页面</h1>
+    <div id="payment-methods"></div>
+    <a href="cart.html">⬅️ 返回购物车</a>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
+        authDomain: "muse-store-01.firebaseapp.com",
+        projectId: "muse-store-01",
+        storageBucket: "muse-store-01.firebasestorage.app",
+        messagingSenderId: "590294528151",
+        appId: "1:590294528151:web:b7a16dfb58a64d641579d2"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      async function loadPaymentMethods() {
+        const querySnapshot = await getDocs(collection(db, "paymentMethods"));
+        const container = document.getElementById("payment-methods");
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+
+          container.innerHTML += `
+            <div class="method">
+              <h3>💳 ${data.name}</h3>
+              <img src="${data.qrImageUrl}" alt="${data.name} QR Code" />
+              <p><strong>Account Name:</strong> ${data.accountName}</p>
+              <p><strong>Account Number:</strong> ${data.accountNumber}</p>
+              <p><strong>Type:</strong> ${data.type}</p>
+            </div>
+          `;
+        });
+      }
+
+      loadPaymentMethods();
+    </script>
+  </body>
+</html>
