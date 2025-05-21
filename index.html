@@ -5,7 +5,7 @@
     <title>Welcome to Muse Store</title>
   </head>
   <body>
-<a href="cart.html">🛒 查看购物车</a>
+    <a href="cart.html">🛒 查看购物车</a>
     <h1>Hello, this is Muse!</h1>
     <p>Your site is now live 🎉</p>
     <div id="product-list"></div>
@@ -45,13 +45,13 @@
 
       loadProducts();
 
-    <script>
-  window.buyNow = function(name, price) {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.push({ name, price });
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`✅ ${name} 已加入购物车！`);
-  };
-</script>
+      // 注册全局 buyNow 方法
+      window.buyNow = function(name, price) {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.push({ name, price });
+        localStorage.setItem("cart", JSON.stringify(cart));
+        alert(`🛒 已加入购物车：${name} - RM${price}`);
+      };
+    </script>
   </body>
 </html>
