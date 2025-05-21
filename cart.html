@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shopping Cart</title>
+  </head>
+  <body>
+    <h1>🛒 您的购物车</h1>
+    <div id="cart-list"></div>
+    <h2 id="total-price"></h2>
+    <a href="index.html">⬅️ 返回商店</a>
+
+    <script>
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartList = document.getElementById("cart-list");
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        total += item.price;
+        cartList.innerHTML += `
+          <div style="border-bottom:1px solid #ddd; margin:10px 0;">
+            ${item.name} - RM${item.price.toFixed(2)}
+          </div>
+        `;
+      });
+
+      document.getElementById("total-price").textContent = `总金额：RM${total.toFixed(2)}`;
+    </script>
+  </body>
+</html>
