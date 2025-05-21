@@ -9,9 +9,9 @@
     <div id="cart-list"></div>
     <h2 id="total-price"></h2>
     <a href="index.html">⬅️ 返回商店</a>
-   <script>
+<script>
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const cartDiv = document.getElementById("cart");
+  const cartDiv = document.getElementById("cart-list"); // ✅ 改成正确的 ID
   let total = 0;
 
   if (cart.length === 0) {
@@ -24,6 +24,5 @@
     cartDiv.innerHTML += `<p><strong>总金额：RM${total.toFixed(2)}</strong></p>`;
   }
 </script>
-
   </body>
 </html>
