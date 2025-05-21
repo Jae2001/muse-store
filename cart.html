@@ -1,35 +1,48 @@
-<script>
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const cartDiv = document.getElementById("cart-list");
-  let total = 0;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shopping Cart</title>
+  </head>
+  <body>
+    <h1>🛒 您的购物车</h1>
+    <div id="cart-list"></div>
+    <h2 id="total-price"></h2>
+    <a href="index.html">⬅️ 返回商店</a>
 
-  function renderCart() {
-    cartDiv.innerHTML = ""; // 清空旧内容
-    total = 0;
+    <script>
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartDiv = document.getElementById("cart-list");
 
-    if (cart.length === 0) {
-      cartDiv.innerHTML = "<p>购物车为空</p>";
-      document.getElementById("total-price").innerText = "";
-    } else {
-      cart.forEach((item, index) => {
-        cartDiv.innerHTML += `
-          <div style="margin-bottom: 10px;">
-            ${item.name} - RM${item.price.toFixed(2)} 
-            <button onclick="removeItem(${index})">❌ 删除</button>
-          </div>
-        `;
-        total += item.price;
-      });
+      function renderCart() {
+        cartDiv.innerHTML = "";
+        let total = 0;
 
-      document.getElementById("total-price").innerText = `总金额：RM${total.toFixed(2)}`;
-    }
-  }
+        if (cart.length === 0) {
+          cartDiv.innerHTML = "<p>购物车为空</p>";
+          document.getElementById("total-price").innerText = "";
+        } else {
+          cart.forEach((item, index) => {
+            cartDiv.innerHTML += `
+              <div style="margin-bottom: 10px;">
+                ${item.name} - RM${item.price.toFixed(2)}
+                <button onclick="removeItem(${index})">❌ 删除</button>
+              </div>
+            `;
+            total += item.price;
+          });
 
-  function removeItem(index) {
-    cart.splice(index, 1); // 删除指定商品
-    localStorage.setItem("cart", JSON.stringify(cart)); // 更新 localStorage
-    renderCart(); // 重新渲染
-  }
+          document.getElementById("total-price").innerText = `总金额：RM${total.toFixed(2)}`;
+        }
+      }
 
-  renderCart(); // 初始加载
-</script>
+      function removeItem(index) {
+        cart.splice(index, 1); // 删除该 index 的商品
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      renderCart(); // 初次渲染
+    </script>
+  </body>
+</html>
