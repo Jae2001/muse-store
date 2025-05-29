@@ -54,7 +54,6 @@
 
       const dropdown = document.getElementById("payment-method-dropdown");
       const detailsDiv = document.getElementById("payment-details");
-
       let paymentMethods = [];
 
       async function loadPaymentMethods() {
@@ -64,20 +63,21 @@
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
+          console.log("读取付款方式：", data); // 调试用途
           paymentMethods.push(data);
+
           const option = document.createElement("option");
-          option.value = data.name;
-          option.textContent = data.name;
+          option.value = data.accountName;
+          option.textContent = data.accountName;
           dropdown.appendChild(option);
         });
       }
 
       dropdown.addEventListener("change", () => {
-        const selected = paymentMethods.find(method => method.name === dropdown.value);
+        const selected = paymentMethods.find(method => method.accountName === dropdown.value);
         if (selected) {
           detailsDiv.innerHTML = `
-            <p><strong>银行名称：</strong> ${selected.name}</p>
-            <p><strong>户口名称：</strong> ${selected.accountName}</p>
+            <p><strong>银行名称：</strong> ${selected.accountName}</p>
             <p><strong>户口号码：</strong> ${selected.accountNumber}</p>
             ${selected.qrImageUrl ? `<img src="${selected.qrImageUrl}" alt="QR Code" width="150">` : ""}
           `;
@@ -100,7 +100,7 @@
 
       document.getElementById("total-checkout-price").textContent = `🧾 总金额：RM${total.toFixed(2)}`;
 
-      // 提交订单（示范）
+      // 提交订单
       window.submitOrder = function() {
         const refNo = document.getElementById("ref-no").value.trim();
         const date = document.getElementById("transfer-date").value;
