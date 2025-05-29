@@ -101,20 +101,53 @@
       document.getElementById("total-checkout-price").textContent = `🧾 总金额：RM${total.toFixed(2)}`;
 
       // 提交订单
-      window.submitOrder = function() {
-        const refNo = document.getElementById("ref-no").value.trim();
-        const date = document.getElementById("transfer-date").value;
-        const time = document.getElementById("transfer-time").value;
-        const method = document.getElementById("payment-method-dropdown").value;
-        const file = document.getElementById("slip-file").files[0];
+window.submitOrder = async function() {
+  const refNo = document.getElementById("ref-no").value.trim();
+  const date = document.getElementById("transfer-date").value;
+  const time = document.getElementById("transfer-time").value;
+  const method = document.getElementById("payment-method-dropdown").value;
+  const file = document.getElementById("slip-file").files[0];
 
-        if (!refNo || !date || !time || !method || !file) {
-          alert("请填写所有转账资料并选择付款方式，上传 Bank-in Slip！");
-          return;
-        }
+  if (!refNo || !date || !time || !method || !file) {
+    alert("请填写所有转账资料并选择付款方式，上传 Bank-in Slip！");
+    return;
+  }
 
-        alert("提交成功！（下一步：上传凭证和存入 Firestore）🎉");
-      }
-    </script>
+  try {
+    const confirmMsg = confirm("确认要提交订单并上传付款凭据吗？");
+    if (!confirmMsg) return;
+
+    // 上传付款凭据
+    const filename = `slips/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, filename);
+    await uploadBytes(storageRef, file);
+    const slipUrl = await getDownloadURL(storageRef);
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    // 提交 Firestore 订单，包括 status 字段
+    await addDoc(collection(db, "orders"), {
+      items: cart,
+      total: total,
+      paymentMethod: method,
+      refNo: refNo,
+      transferDate: date,
+      transferTime: time,
+      slipUrl: slipUrl,
+      createdAt: new Date().toISOString(),
+      status: "pending"  // ✅ 新增 status 字段，默认是 pending
+    });
+
+    alert("✅ 订单提交成功！等待审核中 😊");
+    localStorage.removeItem("cart");
+    window.location.href = "success.html";
+
+  } catch (error) {
+    console.error("提交订单出错：", error);
+    alert("❌ 提交失败，请稍后再试！");
+  }
+}
+   </script>
   </body>
 </html>
