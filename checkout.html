@@ -3,28 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <title>Checkout</title>
-    <style>
-      img {
-        max-width: 200px;
-        display: block;
-        margin-bottom: 10px;
-      }
-      .method {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 10px;
-        border-radius: 10px;
-      }
-    </style>
   </head>
   <body>
-    <h1>🧾 结账页面</h1>
+    <h1>💳 结账页面</h1>
+    <div id="cart-list"></div>
+    <h2 id="total-amount"></h2>
+
+    <h3>请选择付款方式：</h3>
     <div id="payment-methods"></div>
-    <a href="cart.html">⬅️ 返回购物车</a>
+
+    <button id="submit-order">✅ 我已转账</button>
+
+    <a href="index.html">⬅️ 返回商店</a>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
@@ -38,26 +32,67 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      // 合并相同商品
+      const mergedCart = {};
+      cart.forEach(item => {
+        if (mergedCart[item.name]) {
+          mergedCart[item.name].quantity += 1;
+        } else {
+          mergedCart[item.name] = { ...item, quantity: 1 };
+        }
+      });
+
+      let total = 0;
+      const cartDiv = document.getElementById("cart-list");
+
+      Object.values(mergedCart).forEach(item => {
+        cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)} x ${item.quantity}</p>`;
+        total += item.price * item.quantity;
+      });
+
+      document.getElementById("total-amount").innerText = `🧾 总金额：RM${total.toFixed(2)}`;
+
+      // 加载付款方式
       async function loadPaymentMethods() {
-        const querySnapshot = await getDocs(collection(db, "paymentMethods"));
-        const container = document.getElementById("payment-methods");
-
-        querySnapshot.forEach((doc) => {
+        const paymentDiv = document.getElementById("payment-methods");
+        const snapshot = await getDocs(collection(db, "paymentMethods"));
+        snapshot.forEach(doc => {
           const data = doc.data();
-
-          container.innerHTML += `
-            <div class="method">
-              <h3>💳 ${data.name}</h3>
-              <img src="${data.qrImageUrl}" alt="${data.name} QR Code" />
-              <p><strong>Account Name:</strong> ${data.accountName}</p>
-              <p><strong>Account Number:</strong> ${data.accountNumber}</p>
-              <p><strong>Type:</strong> ${data.type}</p>
+          paymentDiv.innerHTML += `
+            <div style="margin-bottom:10px;">
+              <p><strong>${data.name}</strong></p>
+              <img src="${data.imageUrl}" alt="${data.name}" width="200" />
             </div>
           `;
         });
       }
 
       loadPaymentMethods();
+
+      // 提交订单到 Firebase
+      document.getElementById("submit-order").addEventListener("click", async () => {
+        if (Object.keys(mergedCart).length === 0) {
+          alert("购物车为空！");
+          return;
+        }
+
+        const order = {
+          items: Object.values(mergedCart),
+          total: total,
+          createdAt: new Date().toISOString(),
+        };
+
+        try {
+          await addDoc(collection(db, "orders"), order);
+          alert("✅ 订单已提交！");
+          localStorage.removeItem("cart");
+          window.location.href = "index.html";
+        } catch (err) {
+          alert("❌ 提交失败：" + err.message);
+        }
+      });
     </script>
   </body>
 </html>
