@@ -10,13 +10,66 @@
     <h2 id="total-checkout-price"></h2>
 
     <hr />
-    <h3>请选择付款方式：</h3>
-    <select id="payment-method">
-      <option value="Maybank">Maybank</option>
-      <option value="Public Bank">Public Bank</option>
-      <option value="HSBC">HSBC</option>
-    </select>
+  <h3>请选择付款方式：</h3>
+<select id="payment-method-dropdown">
+  <option value="">-- 请选择银行 --</option>
+</select>
 
+<div id="payment-details" style="margin-top: 15px;"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
+    authDomain: "muse-store-01.firebaseapp.com",
+    projectId: "muse-store-01",
+    storageBucket: "muse-store-01.firebasestorage.app",
+    messagingSenderId: "590294528151",
+    appId: "1:590294528151:web:b7a16dfb58a64d641579d2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 🔽 加载付款方式
+  async function loadPaymentMethods() {
+    const dropdown = document.getElementById("payment-method-dropdown");
+    const detailsDiv = document.getElementById("payment-details");
+
+    const querySnapshot = await getDocs(collection(db, "paymentMethods"));
+
+    const paymentMethods = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      paymentMethods.push(data);
+
+      // 动态添加下拉选项
+      const option = document.createElement("option");
+      option.value = data.name;
+      option.textContent = data.name;
+      dropdown.appendChild(option);
+    });
+
+    // 监听选择变化，显示详细信息
+    dropdown.addEventListener("change", () => {
+      const selected = paymentMethods.find(method => method.name === dropdown.value);
+      if (selected) {
+        detailsDiv.innerHTML = `
+          <p><strong>银行名称：</strong> ${selected.name}</p>
+          <p><strong>户口名称：</strong> ${selected.accountName}</p>
+          <p><strong>户口号码：</strong> ${selected.accountNumber}</p>
+          ${selected.qrImageUrl ? `<img src="${selected.qrImageUrl}" alt="QR Code" width="150">` : ""}
+        `;
+      } else {
+        detailsDiv.innerHTML = "";
+      }
+    });
+  }
+
+  loadPaymentMethods();
+</script>
     <h3>填写转账资料：</h3>
     <label>Reference No:</label><br />
     <input type="text" id="ref-no" /><br /><br />
