@@ -38,10 +38,8 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
       import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-storage.js";
-
-
 
       const firebaseConfig = {
         apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
@@ -67,7 +65,7 @@
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          console.log("读取付款方式：", data); // 调试用途
+          console.log("读取付款方式：", data);
           paymentMethods.push(data);
 
           const option = document.createElement("option");
@@ -92,7 +90,6 @@
 
       loadPaymentMethods();
 
-      // 显示购物车商品和总金额
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       let total = 0;
       const checkoutList = document.getElementById("checkout-list");
@@ -104,54 +101,51 @@
 
       document.getElementById("total-checkout-price").textContent = `🧾 总金额：RM${total.toFixed(2)}`;
 
-      // 提交订单
-window.submitOrder = async function() {
-  const refNo = document.getElementById("ref-no").value.trim();
-  const date = document.getElementById("transfer-date").value;
-  const time = document.getElementById("transfer-time").value;
-  const method = document.getElementById("payment-method-dropdown").value;
-  const file = document.getElementById("slip-file").files[0];
+      window.submitOrder = async function() {
+        const refNo = document.getElementById("ref-no").value.trim();
+        const date = document.getElementById("transfer-date").value;
+        const time = document.getElementById("transfer-time").value;
+        const method = document.getElementById("payment-method-dropdown").value;
+        const file = document.getElementById("slip-file").files[0];
 
-  if (!refNo || !date || !time || !method || !file) {
-    alert("请填写所有转账资料并选择付款方式，上传 Bank-in Slip！");
-    return;
-  }
+        if (!refNo || !date || !time || !method || !file) {
+          alert("请填写所有转账资料并选择付款方式，上传 Bank-in Slip！");
+          return;
+        }
 
-  try {
-    const confirmMsg = confirm("确认要提交订单并上传付款凭据吗？");
-    if (!confirmMsg) return;
+        try {
+          const confirmMsg = confirm("确认要提交订单并上传付款凭据吗？");
+          if (!confirmMsg) return;
 
-    // 上传付款凭据
-    const filename = `slips/${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, filename);
-    await uploadBytes(storageRef, file);
-    const slipUrl = await getDownloadURL(storageRef);
+          const filename = `slips/${Date.now()}_${file.name}`;
+          const storageRef = ref(storage, filename);
+          await uploadBytes(storageRef, file);
+          const slipUrl = await getDownloadURL(storageRef);
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+          const cart = JSON.parse(localStorage.getItem("cart")) || [];
+          const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    // 提交 Firestore 订单，包括 status 字段
-    await addDoc(collection(db, "orders"), {
-      items: cart,
-      total: total,
-      paymentMethod: method,
-      refNo: refNo,
-      transferDate: date,
-      transferTime: time,
-      slipUrl: slipUrl,
-      createdAt: new Date().toISOString(),
-      status: "pending"  // ✅ 新增 status 字段，默认是 pending
-    });
+          await addDoc(collection(db, "orders"), {
+            items: cart,
+            total: total,
+            paymentMethod: method,
+            refNo: refNo,
+            transferDate: date,
+            transferTime: time,
+            slipUrl: slipUrl,
+            createdAt: new Date().toISOString(),
+            status: "pending"
+          });
 
-    alert("✅ 订单提交成功！等待审核中 😊");
-    localStorage.removeItem("cart");
-    window.location.href = "success.html";
+          alert("✅ 订单提交成功！等待审核中 😊");
+          localStorage.removeItem("cart");
+          window.location.href = "success.html";
 
-  } catch (error) {
-    console.error("提交订单出错：", error);
-    alert("❌ 提交失败，请稍后再试！");
-  }
-}
-   </script>
+        } catch (error) {
+          console.error("提交订单出错：", error);
+          alert("❌ 提交失败，请稍后再试！");
+        }
+      }
+    </script>
   </body>
 </html>
