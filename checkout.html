@@ -2,97 +2,68 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Checkout</title>
+    <title>💳 结账页面</title>
   </head>
   <body>
     <h1>💳 结账页面</h1>
-    <div id="cart-list"></div>
-    <h2 id="total-amount"></h2>
+    <div id="checkout-list"></div>
+    <h2 id="total-checkout-price"></h2>
 
+    <hr />
     <h3>请选择付款方式：</h3>
-    <div id="payment-methods"></div>
+    <select id="payment-method">
+      <option value="Maybank">Maybank</option>
+      <option value="Public Bank">Public Bank</option>
+      <option value="HSBC">HSBC</option>
+    </select>
 
-    <button id="submit-order">✅ 我已转账</button>
+    <h3>填写转账资料：</h3>
+    <label>Reference No:</label><br />
+    <input type="text" id="ref-no" /><br /><br />
 
+    <label>转账日期:</label><br />
+    <input type="date" id="transfer-date" /><br /><br />
+
+    <label>转账时间:</label><br />
+    <input type="time" id="transfer-time" /><br /><br />
+
+    <label>上传 Bank-in Slip:</label><br />
+    <input type="file" id="slip-file" accept="image/*" /><br /><br />
+
+    <button onclick="submitOrder()">✅ 我已转账</button>
+
+    <br /><br />
+    <a href="cart.html">⬅️ 返回购物车</a><br />
     <a href="index.html">⬅️ 返回商店</a>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD2v-BrgI9EfEMN1tcw6qh4xDXRFtBBcsw",
-        authDomain: "muse-store-01.firebaseapp.com",
-        projectId: "muse-store-01",
-        storageBucket: "muse-store-01.firebasestorage.app",
-        messagingSenderId: "590294528151",
-        appId: "1:590294528151:web:b7a16dfb58a64d641579d2"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
+    <script>
+      // 显示购物车商品和总金额
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-      // 合并相同商品
-      const mergedCart = {};
-      cart.forEach(item => {
-        if (mergedCart[item.name]) {
-          mergedCart[item.name].quantity += 1;
-        } else {
-          mergedCart[item.name] = { ...item, quantity: 1 };
-        }
-      });
-
       let total = 0;
-      const cartDiv = document.getElementById("cart-list");
+      const checkoutList = document.getElementById("checkout-list");
 
-      Object.values(mergedCart).forEach(item => {
-        cartDiv.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)} x ${item.quantity}</p>`;
+      cart.forEach((item) => {
+        checkoutList.innerHTML += `<p>${item.name} - RM${item.price.toFixed(2)} x ${item.quantity}</p>`;
         total += item.price * item.quantity;
       });
 
-      document.getElementById("total-amount").innerText = `🧾 总金额：RM${total.toFixed(2)}`;
+      document.getElementById("total-checkout-price").textContent = `🧾 总金额：RM${total.toFixed(2)}`;
 
-      // 加载付款方式
-      async function loadPaymentMethods() {
-        const paymentDiv = document.getElementById("payment-methods");
-        const snapshot = await getDocs(collection(db, "paymentMethods"));
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          paymentDiv.innerHTML += `
-            <div style="margin-bottom:10px;">
-              <p><strong>${data.name}</strong></p>
-              <img src="${data.imageUrl}" alt="${data.name}" width="200" />
-            </div>
-          `;
-        });
-      }
+      // 提交订单（下一步连到 Firebase）
+      function submitOrder() {
+        const refNo = document.getElementById("ref-no").value;
+        const date = document.getElementById("transfer-date").value;
+        const time = document.getElementById("transfer-time").value;
+        const method = document.getElementById("payment-method").value;
+        const file = document.getElementById("slip-file").files[0];
 
-      loadPaymentMethods();
-
-      // 提交订单到 Firebase
-      document.getElementById("submit-order").addEventListener("click", async () => {
-        if (Object.keys(mergedCart).length === 0) {
-          alert("购物车为空！");
+        if (!refNo || !date || !time || !file) {
+          alert("请填写所有转账资料并上传 Bank-in Slip！");
           return;
         }
 
-        const order = {
-          items: Object.values(mergedCart),
-          total: total,
-          createdAt: new Date().toISOString(),
-        };
-
-        try {
-          await addDoc(collection(db, "orders"), order);
-          alert("✅ 订单已提交！");
-          localStorage.removeItem("cart");
-          window.location.href = "index.html";
-        } catch (err) {
-          alert("❌ 提交失败：" + err.message);
-        }
-      });
+        alert("提交成功（下一步我们会把这些存入 Firebase）🎉");
+      }
     </script>
   </body>
 </html>
